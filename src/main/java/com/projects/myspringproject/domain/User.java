@@ -13,6 +13,9 @@ import static javax.persistence.GenerationType.AUTO;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * The model for building a user
+ */
 public class User
 {
     @Id

@@ -21,6 +21,9 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 @Slf4j
+/**
+ * This class filters request from the user
+ */
 public class AuthFilter extends UsernamePasswordAuthenticationFilter
 {
     private final AuthenticationManager authenticationManager;
@@ -29,6 +32,13 @@ public class AuthFilter extends UsernamePasswordAuthenticationFilter
         this.authenticationManager = authenticationManager;
     }
 
+    /**
+     * This method authenticates a token when a user attempts to login
+     * @param request from the user
+     * @param response from the server or api
+     * @return authentication token
+     * @throws AuthenticationException
+     */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
@@ -40,12 +50,23 @@ public class AuthFilter extends UsernamePasswordAuthenticationFilter
         return authenticationManager.authenticate(authenticationToken);
     }
 
+    /**
+     * This method is called if the user is authenticated successfully
+     * @param request from the user
+     * @param response from the api
+     * @param chain
+     * @param auth authentication
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain chain, Authentication auth) throws IOException, ServletException {
         User user = (User)auth.getPrincipal();
         Algorithm algo = Algorithm.HMAC256("secured".getBytes());
+
+        //generates an access token for the user
         String access_token = JWT.create()
                 .withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()* 10*60*1000))
@@ -53,6 +74,7 @@ public class AuthFilter extends UsernamePasswordAuthenticationFilter
                 .withClaim("roles",user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algo);
 
+        //generates a refresh token after the access token has expired
         String refresh_token = JWT.create()
                 .withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()* 50*60*1000))

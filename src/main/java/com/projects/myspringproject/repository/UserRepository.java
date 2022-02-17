@@ -7,6 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
+/**
+ * This is the user repository interface that has some methods already defined
+ * for the service class to use
+ */
 public interface UserRepository extends JpaRepository<User, Long>
 {
     User findByUsername(String username);
